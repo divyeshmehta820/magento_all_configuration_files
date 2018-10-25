@@ -1,0 +1,1 @@
+# magento_all_configuration_files
