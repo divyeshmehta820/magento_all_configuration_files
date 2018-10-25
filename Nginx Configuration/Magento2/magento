@@ -1,0 +1,27 @@
+server {
+     listen 80;
+     server_name indianicapp.local.com;
+     set $MAGE_ROOT /var/www/html/magento2/indianicapp;
+     include /var/www/html/magento2/indianicapp/nginx.conf.sample;
+ }
+
+ server {
+     listen 80;
+     server_name beta.medicinedirect.co.uk;
+     set $MAGE_ROOT /var/www/html/magento2/medicinedirect;
+     include /var/www/html/magento2/medicinedirect/nginx.conf.sample;
+ }
+
+  server {
+     listen 80;
+     server_name beta.parkshealthproducts.com;
+     set $MAGE_ROOT /var/www/html/magento2/parkshealthproducts;
+     include /var/www/html/magento2/parkshealthproducts/nginx.conf.sample;
+ }
+
+ server {
+     listen 80;
+     server_name shopquary.mageinic.com;
+     set $MAGE_ROOT /var/www/html/magento2/shopquary;
+     include /var/www/html/magento2/shopquary/nginx.conf.sample;
+ }

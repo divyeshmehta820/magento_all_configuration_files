@@ -1,0 +1,86 @@
+
+server {
+    listen 80;
+    listen [::]:80;
+#   listen 443 ssl;
+#   include snippets/self-signed.conf;
+    #access_log  /var/www/html/magento/access.log;
+    #error_log   /var/www/html/magento/error.log debug;
+
+    server_name *.local.com;
+    set $MAGE_ROOT /var/www/html/magento;
+    if ($host ~* ^(.*).local.com$) {
+        set $site $1;
+    }
+
+    if (!-d /var/www/html/magento/$site/) {
+        return 404;
+    }
+    
+    location ~ / {
+        root $MAGE_ROOT/$site;
+        autoindex off;
+        try_files $uri /index.php?$args;
+    location ~(index|get|report|Context|404|503|example_061|hash_generator)\.php$ {
+            try_files $uri =404;
+            #fastcgi_split_path_info ^(.+\.php)(.*)$;
+            fastcgi_pass   fastcgi_backend;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+            include fastcgi_params;
+        fastcgi_read_timeout 300;
+        }
+        
+        location ~ /downloader/ {
+            #alias $MAGE_ROOT/$site/downloader/;
+            try_files $uri $uri/ /index.php/?$args;
+            
+            #fastcgi_split_path_info ^(.+\.php)(.*)$;
+            fastcgi_pass   fastcgi_backend;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+            include fastcgi_params;
+            
+            location ~ ^/downloader/.*\.(ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2)$ {
+                add_header Cache-Control "public";
+                add_header X-Frame-Options "SAMEORIGIN";
+                expires +1y;
+                try_files $uri $uri/ $site/downloader/?$args;
+            }
+        }
+        
+        location ~* \.(ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2)$ {
+            add_header Cache-Control "public";
+            add_header X-Frame-Options "SAMEORIGIN";
+            expires +1y;
+            try_files $uri $uri/ $site/?$args;
+        }    
+        
+        location ~* (\.php$|\.htaccess$|\.git) {
+            deny all;
+        }
+    }
+    
+    
+    
+    gzip on;
+    gzip_disable "msie6";
+    
+    gzip_comp_level 6;
+    gzip_min_length 1100;
+    gzip_buffers 16 8k;
+    gzip_proxied any;
+    gzip_types
+        text/plain
+        text/css
+        text/js
+        text/xml
+        text/javascript
+        application/javascript
+        application/x-javascript
+        application/json
+        application/xml
+        application/xml+rss
+        image/svg+xml;
+    gzip_vary on;
+}
